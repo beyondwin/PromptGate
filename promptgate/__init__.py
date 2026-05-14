@@ -1,8 +1,5 @@
 __version__ = "0.1.0"
 
-try:
-    from .runtime import run_promptgate
-except ImportError:
-    run_promptgate = None
+from .runtime import run_promptgate
 
 __all__ = ["__version__", "run_promptgate"]
