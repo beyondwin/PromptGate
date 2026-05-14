@@ -2,7 +2,9 @@ import contextlib
 import io
 import json
 import os
+import tempfile
 import unittest
+from pathlib import Path
 
 from promptgate.cli import format_result
 from tests.test_promptgate_result import VALID_RESULT
@@ -64,6 +66,87 @@ class PromptGateCLIDoctorTest(unittest.TestCase):
         self.assertEqual(exit_code, 0)
         self.assertEqual(by_name["provider"]["status"], "skipped")
         self.assertEqual(by_name["provider"]["summary"], "OPENAI_API_KEY is not set")
+
+
+class PromptGateCLIHooksInstallTest(unittest.TestCase):
+    def test_hooks_install_json_dry_run_outputs_structured_report(self):
+        from promptgate.cli import main
+
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "config.json"
+            stdout = io.StringIO()
+
+            with contextlib.redirect_stdout(stdout):
+                exit_code = main(
+                    [
+                        "hooks",
+                        "install",
+                        "--adapter",
+                        "codex",
+                        "--target",
+                        str(target),
+                        "--json",
+                    ]
+                )
+
+            payload = json.loads(stdout.getvalue())
+            self.assertEqual(exit_code, 0)
+            self.assertEqual(payload["adapter"], "codex")
+            self.assertEqual(payload["mode"], "dry-run")
+            self.assertFalse(target.exists())
+
+    def test_hooks_install_apply_writes_target(self):
+        from promptgate.cli import main
+
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "settings.json"
+            stdout = io.StringIO()
+
+            with contextlib.redirect_stdout(stdout):
+                exit_code = main(
+                    [
+                        "hooks",
+                        "install",
+                        "--adapter",
+                        "claude",
+                        "--target",
+                        str(target),
+                        "--apply",
+                        "--skip-doctor",
+                        "--json",
+                    ]
+                )
+
+            payload = json.loads(stdout.getvalue())
+            self.assertEqual(exit_code, 0)
+            self.assertTrue(target.exists())
+            self.assertTrue(payload["changed"])
+
+    def test_hooks_install_invalid_target_json_returns_failure(self):
+        from promptgate.cli import main
+
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "config.json"
+            target.write_text("{invalid", encoding="utf-8")
+            stdout = io.StringIO()
+
+            with contextlib.redirect_stdout(stdout):
+                exit_code = main(
+                    [
+                        "hooks",
+                        "install",
+                        "--adapter",
+                        "codex",
+                        "--target",
+                        str(target),
+                        "--json",
+                    ]
+                )
+
+            payload = json.loads(stdout.getvalue())
+            self.assertEqual(exit_code, 1)
+            self.assertFalse(payload["ok"])
+            self.assertIn("target JSON is invalid", payload["error"])
 
 
 if __name__ == "__main__":
