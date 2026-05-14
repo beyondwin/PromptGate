@@ -80,6 +80,16 @@ class PromptGateResourceFallbackTest(unittest.TestCase):
         self.assertEqual(by_name["codex hook smoke"].status, "ok")
         self.assertEqual(by_name["claude hook smoke"].status, "ok")
 
+    def test_eval_suite_works_outside_checkout(self):
+        from promptgate.eval_runner import run_eval_suite
+
+        with tempfile.TemporaryDirectory() as tmp:
+            with temporary_cwd(Path(tmp)):
+                report = run_eval_suite()
+
+        self.assertIn("Validated 5 eval file(s).", report)
+        self.assertIn("Deterministic runtime guard checks passed.", report)
+
 
 if __name__ == "__main__":
     unittest.main()

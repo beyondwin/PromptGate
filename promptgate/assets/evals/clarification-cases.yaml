@@ -1,0 +1,16 @@
+cases:
+  - id: needs_artifact_question
+    input: "이거 정리해서 보내줘"
+    expected:
+      clarification_needed: true
+      question_count: 1
+      question_includes:
+        - "어떤 결과물"
+
+  - id: no_question_when_direction_clear
+    input: "코드말고 방향만 잡아줘"
+    expected:
+      clarification_needed: false
+      refined_prompt_includes:
+        - "코드는 작성하지 말고"
+        - "방향"

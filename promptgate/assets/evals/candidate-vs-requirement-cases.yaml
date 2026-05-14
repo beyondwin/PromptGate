@@ -1,0 +1,22 @@
+cases:
+  - id: redis_candidate_not_requirement
+    input: "Redis 쓰면 되나 세션이랑 캐시랑 같이 쓰고 싶은데"
+    expected:
+      goal_includes:
+        - "세션"
+        - "캐시"
+      solution_candidates:
+        - "Redis"
+      should_not_assume:
+        - "Redis is required"
+
+  - id: framework_candidate_not_requirement
+    input: "Next.js로 하면 되나 관리자 페이지 빠르게 만들고 싶은데"
+    expected:
+      goal_includes:
+        - "관리자 페이지"
+        - "빠르게"
+      solution_candidates:
+        - "Next.js"
+      should_not_assume:
+        - "Next.js is required"

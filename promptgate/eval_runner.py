@@ -4,9 +4,9 @@ import copy
 import json
 from pathlib import Path
 
-from scripts.validate_evals import validate_all
-
+from .eval_validation import validate_all
 from .llm import FakeProvider
+from .resources import runtime_root
 from .runtime import run_promptgate
 
 
@@ -50,7 +50,7 @@ VALID_DRAFT = {
 
 
 def run_eval_suite(project_root: Path | None = None) -> str:
-    root = project_root or Path.cwd()
+    root = runtime_root(project_root)
     eval_paths = validate_all(root / "evals")
     _run_guard_smoke(root)
     return (

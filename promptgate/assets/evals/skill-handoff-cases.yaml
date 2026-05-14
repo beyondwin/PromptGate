@@ -1,0 +1,30 @@
+cases:
+  - id: explicit_skill_handoff
+    input: "$example-low-risk-skill 이거 정리해서 자연스럽게 만들어줘"
+    registered_skills:
+      - id: example-low-risk-skill
+        risk_level: low
+        auto_invocable: true
+    expected:
+      target_source: explicit
+      target_skill: example-low-risk-skill
+      status: auto_handoff
+
+  - id: missing_explicit_skill
+    input: "$missing-skill 이거 정리해줘"
+    registered_skills:
+      - id: example-low-risk-skill
+        risk_level: low
+        auto_invocable: true
+    expected:
+      target_source: none
+      target_skill: null
+      status: skill_not_found
+
+  - id: no_fake_skill
+    input: "내 의도를 정리해서 맞는 스킬로 보내줘"
+    registered_skills: []
+    expected:
+      target_source: none
+      target_skill: null
+      status: no_match
