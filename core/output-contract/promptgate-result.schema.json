@@ -1,0 +1,102 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://promptgate.dev/schemas/promptgate-result.schema.json",
+  "title": "PromptGateResult",
+  "type": "object",
+  "required": [
+    "original_prompt",
+    "refined_prompt",
+    "intent",
+    "context",
+    "clarification",
+    "skill_handoff",
+    "safety"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "original_prompt": { "type": "string", "minLength": 1 },
+    "refined_prompt": { "type": "string", "minLength": 1 },
+    "intent": {
+      "type": "object",
+      "required": ["goal", "domain", "task_type", "confidence"],
+      "additionalProperties": false,
+      "properties": {
+        "goal": { "type": "string", "minLength": 1 },
+        "domain": { "type": "string", "minLength": 1 },
+        "task_type": { "type": "string", "minLength": 1 },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "context": {
+      "type": "object",
+      "required": [
+        "background",
+        "constraints",
+        "exclusions",
+        "output_preferences",
+        "solution_candidates",
+        "assumptions"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "background": { "type": "array", "items": { "type": "string" } },
+        "constraints": { "type": "array", "items": { "type": "string" } },
+        "exclusions": { "type": "array", "items": { "type": "string" } },
+        "output_preferences": { "type": "array", "items": { "type": "string" } },
+        "solution_candidates": { "type": "array", "items": { "type": "string" } },
+        "assumptions": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "clarification": {
+      "type": "object",
+      "required": ["needed", "question", "reason"],
+      "additionalProperties": false,
+      "properties": {
+        "needed": { "type": "boolean" },
+        "question": { "type": ["string", "null"] },
+        "reason": { "type": ["string", "null"] }
+      }
+    },
+    "skill_handoff": {
+      "type": "object",
+      "required": [
+        "mode",
+        "explicit_skill_mention",
+        "target_skill",
+        "target_source",
+        "confidence",
+        "status",
+        "reason"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "mode": { "enum": ["auto", "suggest", "debug", "off"] },
+        "explicit_skill_mention": { "type": ["string", "null"] },
+        "target_skill": { "type": ["string", "null"] },
+        "target_source": { "enum": ["explicit", "matched", "none"] },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+        "status": {
+          "enum": [
+            "auto_handoff",
+            "suggested",
+            "no_match",
+            "skill_not_found",
+            "blocked_by_risk",
+            "disabled"
+          ]
+        },
+        "reason": { "type": ["string", "null"] }
+      }
+    },
+    "safety": {
+      "type": "object",
+      "required": ["risk_level", "requires_confirmation", "reason"],
+      "additionalProperties": false,
+      "properties": {
+        "risk_level": { "enum": ["low", "medium", "high", "destructive"] },
+        "requires_confirmation": { "type": "boolean" },
+        "reason": { "type": ["string", "null"] }
+      }
+    }
+  }
+}

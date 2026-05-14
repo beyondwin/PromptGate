@@ -1,0 +1,24 @@
+skill_registry_schema:
+  version: 1
+  required_skill_fields:
+    - id
+    - description
+    - aliases
+    - domains
+    - task_types
+    - trigger_phrases
+    - risk_level
+    - auto_invocable
+  optional_skill_fields:
+    - platform_names
+  risk_levels:
+    - low
+    - medium
+    - high
+    - destructive
+  id_rules:
+    pattern: "^[a-z0-9][a-z0-9._:-]*$"
+    description: "Stable skill identifier. May include plugin-style namespaces."
+  platform_names:
+    claude: "Skill name used in Claude, or null if unavailable."
+    codex: "Skill name used in Codex, or null if unavailable."
