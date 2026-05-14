@@ -37,3 +37,4 @@ venv/
 .cache/
 .tmp/
 tmp/
+.codex-orchestrator/
