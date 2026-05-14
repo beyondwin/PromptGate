@@ -104,5 +104,54 @@ class PromptGateDoctorHookChecksTest(unittest.TestCase):
         self.assertIn("PromptGate runtime unavailable", by_name["claude hook smoke"].summary)
 
 
+class PromptGateDoctorProviderCheckTest(unittest.TestCase):
+    def test_provider_requested_without_key_is_skipped(self):
+        previous = os.environ.pop("OPENAI_API_KEY", None)
+        try:
+            report = run_doctor(project_root=ROOT, provider=True)
+        finally:
+            if previous is not None:
+                os.environ["OPENAI_API_KEY"] = previous
+
+        by_name = {check.name: check for check in report.checks}
+
+        self.assertTrue(report.ok)
+        self.assertEqual(by_name["provider"].status, "skipped")
+        self.assertEqual(by_name["provider"].summary, "OPENAI_API_KEY is not set")
+
+    def test_provider_requested_with_key_uses_runtime(self):
+        import promptgate.doctor as doctor
+
+        previous_key = os.environ.get("OPENAI_API_KEY")
+        previous_runner = doctor.run_promptgate
+        calls = []
+
+        def fake_run_promptgate(raw_prompt, project_root=None):
+            calls.append((raw_prompt, project_root))
+            from tests.test_promptgate_result import VALID_RESULT
+
+            result = dict(VALID_RESULT)
+            result["original_prompt"] = raw_prompt
+            result["refined_prompt"] = raw_prompt
+            return result
+
+        os.environ["OPENAI_API_KEY"] = "sk-test"
+        doctor.run_promptgate = fake_run_promptgate
+        try:
+            report = doctor.run_doctor(project_root=ROOT, provider=True)
+        finally:
+            doctor.run_promptgate = previous_runner
+            if previous_key is None:
+                os.environ.pop("OPENAI_API_KEY", None)
+            else:
+                os.environ["OPENAI_API_KEY"] = previous_key
+
+        by_name = {check.name: check for check in report.checks}
+
+        self.assertEqual(by_name["provider"].status, "ok")
+        self.assertEqual(calls[0][0], "정리좀")
+        self.assertEqual(calls[0][1], ROOT)
+
+
 if __name__ == "__main__":
     unittest.main()

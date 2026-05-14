@@ -13,6 +13,7 @@ from .config import PromptGateConfig, load_config
 from .lexicon import load_configured_lexicon
 from .registry import load_registry
 from .result import build_fallback_result, load_result_schema, validate_result
+from .runtime import run_promptgate
 
 
 VALID_STATUSES = {"ok", "failed", "skipped"}
@@ -93,7 +94,7 @@ def run_doctor(project_root: Path | None = None, provider: bool = False) -> Doct
         )
     )
 
-    checks.append(_check_provider_requested(provider))
+    checks.append(_check_provider(root, provider))
     return DoctorReport(checks)
 
 
@@ -207,7 +208,7 @@ def _check_hook_smoke(platform: str, script: Path, prompt: str, expected_context
     return DoctorCheck(name, "ok", f"valid JSON contains {expected_context}")
 
 
-def _check_provider_requested(provider: bool) -> DoctorCheck:
+def _check_provider(root: Path, provider: bool) -> DoctorCheck:
     if not provider:
         return DoctorCheck(
             "provider",
@@ -216,7 +217,19 @@ def _check_provider_requested(provider: bool) -> DoctorCheck:
         )
     if not os.environ.get("OPENAI_API_KEY"):
         return DoctorCheck("provider", "skipped", "OPENAI_API_KEY is not set")
-    return DoctorCheck("provider", "skipped", "provider smoke implementation is added in Task 3")
+
+    try:
+        schema = load_result_schema(root)
+        result = run_promptgate("정리좀", project_root=root)
+        validate_result(result, schema)
+    except Exception as exc:
+        return DoctorCheck(
+            "provider",
+            "failed",
+            str(exc),
+            {"exception": exc.__class__.__name__},
+        )
+    return DoctorCheck("provider", "ok", "provider smoke returned a valid PromptGateResult")
 
 
 def _run_check(
