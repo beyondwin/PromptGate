@@ -52,5 +52,33 @@ class PromptGateRuntimeTest(unittest.TestCase):
         validate_result(result)
 
 
+class CapturingProvider:
+    def __init__(self, response):
+        self.response = response
+        self.request = None
+
+    def complete_json(self, request):
+        self.request = request
+        return self.response
+
+    def repair_json(self, request, invalid_output, error):
+        self.request = request
+        return self.response
+
+
+class PromptGateRuntimeContextTest(unittest.TestCase):
+    def test_runtime_includes_preflight_and_lexicon_in_provider_payload(self):
+        draft = copy.deepcopy(VALID_RESULT)
+        provider = CapturingProvider(json.dumps(draft, ensure_ascii=False))
+
+        run_promptgate("코드말고 Redis 쓰면 되나", provider=provider)
+
+        payload = json.loads(provider.request.user_prompt)
+        self.assertEqual(payload["preflight"]["domain_guess"], "dev")
+        self.assertIn("solution_candidate", payload["preflight"]["risk_flags"])
+        phrases = [item["phrase"] for item in payload["matched_user_lexicon"]]
+        self.assertIn("코드말고", phrases)
+
+
 if __name__ == "__main__":
     unittest.main()
