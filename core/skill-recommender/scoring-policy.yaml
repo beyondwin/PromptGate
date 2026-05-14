@@ -1,0 +1,20 @@
+scoring_policy:
+  version: 1
+  default_auto_threshold: 0.78
+  max_recommendations: 3
+  weights:
+    explicit_skill_mention: 1.0
+    domain_match: 0.24
+    task_type_match: 0.24
+    alias_match: 0.18
+    trigger_phrase_match: 0.18
+    description_match: 0.12
+  penalties:
+    ambiguous_intent: 0.15
+    missing_required_registry_fields: 0.4
+    high_risk: 0.3
+    destructive: 1.0
+  rules:
+    explicit_mention_sets_target_source: explicit
+    risk_policy_overrides_confidence: true
+    invent_missing_skills: false

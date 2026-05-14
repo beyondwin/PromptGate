@@ -1,0 +1,15 @@
+lexicon_schema:
+  version: 1
+  required_fields:
+    - phrase
+    - interpretation
+  optional_fields:
+    - output_preference
+    - exclusion
+    - domain_hint
+    - task_type_hint
+  rules:
+    phrase: "Literal user phrase or short pattern."
+    interpretation: "PromptGate's stable interpretation."
+    output_preference: "Optional output style implied by the phrase."
+    exclusion: "Optional exclusion implied by the phrase."

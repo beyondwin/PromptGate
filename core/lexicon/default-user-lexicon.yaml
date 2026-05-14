@@ -1,0 +1,24 @@
+lexicon:
+  - phrase: "정리좀"
+    interpretation: "Clarify the request while preserving meaning."
+    output_preference: "clear and directly usable"
+
+  - phrase: "방향만"
+    interpretation: "Give strategic direction rather than implementation detail."
+    output_preference: "direction over code"
+
+  - phrase: "코드말고"
+    interpretation: "Exclude code from the downstream response."
+    exclusion: "code"
+
+  - phrase: "별론데"
+    interpretation: "Identify weaknesses and propose a better direction."
+    output_preference: "critique plus recommendation"
+
+  - phrase: "너무 AI같지 않게"
+    interpretation: "Avoid generic, exaggerated, or marketing-like phrasing."
+    output_preference: "natural and specific"
+
+  - phrase: "구조가 안잡힘"
+    interpretation: "Clarify scope, actors, boundaries, and expected output."
+    output_preference: "structured framing"
