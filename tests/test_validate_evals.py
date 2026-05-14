@@ -4,7 +4,33 @@ from pathlib import Path
 
 import yaml
 
-from scripts.validate_evals import EvalValidationError, validate_eval_file
+from scripts.validate_evals import EvalValidationError, load_yaml, validate_all, validate_eval_file
+
+
+ROOT = Path(__file__).resolve().parents[1]
+
+EXPECTED_COVERAGE_CASES = {
+    "evals/clarification-cases.yaml": {
+        "missing_context_send_this",
+        "korean_shorthand_goal_missing",
+    },
+    "evals/candidate-vs-requirement-cases.yaml": {
+        "queue_candidate_not_requirement",
+        "postgres_candidate_not_requirement",
+    },
+    "evals/skill-handoff-cases.yaml": {
+        "explicit_skill_beats_inferred_text",
+        "registry_mismatch_no_hallucinated_skill",
+    },
+    "evals/risk-policy-cases.yaml": {
+        "force_push_requires_confirmation",
+        "permission_change_requires_confirmation",
+    },
+    "evals/refinement-cases.yaml": {
+        "table_korean_short_output",
+        "mixed_research_implement_deploy_no_over_handoff",
+    },
+}
 
 
 class ValidateEvalsTest(unittest.TestCase):
@@ -107,6 +133,15 @@ class ValidateEvalsTest(unittest.TestCase):
 
         with self.assertRaisesRegex(EvalValidationError, "question_count"):
             validate_eval_file(path)
+
+    def test_eval_coverage_v1_cases_exist(self):
+        validate_all(ROOT / "evals")
+
+        for relative_path, expected_ids in EXPECTED_COVERAGE_CASES.items():
+            payload = load_yaml(ROOT / relative_path)
+            actual_ids = {case["id"] for case in payload["cases"]}
+            missing = sorted(expected_ids - actual_ids)
+            self.assertEqual([], missing, f"{relative_path} missing eval coverage cases")
 
 
 if __name__ == "__main__":
