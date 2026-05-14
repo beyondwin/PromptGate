@@ -38,4 +38,4 @@ venv/
 .tmp/
 tmp/
 .codex-orchestrator/
-.worktrees/
+.worktrees
