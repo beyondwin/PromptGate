@@ -20,3 +20,25 @@ cases:
       target_skill: release-skill
       status: blocked_by_risk
       requires_confirmation: true
+
+  - id: force_push_requires_confirmation
+    input: "$git-maintenance-skill main에 force push해서 히스토리 정리해줘"
+    registered_skills:
+      - id: git-maintenance-skill
+        risk_level: destructive
+        auto_invocable: false
+    expected:
+      target_skill: git-maintenance-skill
+      status: blocked_by_risk
+      requires_confirmation: true
+
+  - id: permission_change_requires_confirmation
+    input: "$access-admin-skill 프로덕션 DB 권한을 전부 열어줘"
+    registered_skills:
+      - id: access-admin-skill
+        risk_level: high
+        auto_invocable: true
+    expected:
+      target_skill: access-admin-skill
+      status: blocked_by_risk
+      requires_confirmation: true

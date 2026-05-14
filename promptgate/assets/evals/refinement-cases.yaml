@@ -20,3 +20,34 @@ cases:
       output_preferences:
         - "natural"
       clarification_needed: false
+
+  - id: table_korean_short_output
+    input: "이 내용 한국어로 짧게 표로 정리해줘"
+    expected:
+      refined_prompt_includes:
+        - "한국어"
+        - "짧게"
+        - "표"
+      output_preferences:
+        - "Korean"
+        - "concise"
+        - "table"
+      clarification_needed: false
+
+  - id: mixed_research_implement_deploy_no_over_handoff
+    input: "Stripe 찾아보고 구현하고 바로 배포까지 해줘 근데 위험하면 물어봐"
+    registered_skills:
+      - id: example-low-risk-skill
+        risk_level: low
+        auto_invocable: true
+    expected:
+      goal_includes:
+        - "조사"
+        - "구현"
+        - "배포"
+      solution_candidates:
+        - "Stripe"
+      target_source: none
+      target_skill: null
+      status: no_match
+      requires_confirmation: true

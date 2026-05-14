@@ -14,3 +14,19 @@ cases:
       refined_prompt_includes:
         - "코드는 작성하지 말고"
         - "방향"
+
+  - id: missing_context_send_this
+    input: "이거 내일까지 보내야 하는데 알아서 정리해줘"
+    expected:
+      clarification_needed: true
+      question_count: 1
+      question_includes:
+        - "어떤 자료"
+
+  - id: korean_shorthand_goal_missing
+    input: "그거 좀 예쁘게 정리해서 공유용으로"
+    expected:
+      clarification_needed: true
+      question_count: 1
+      question_includes:
+        - "무엇을"

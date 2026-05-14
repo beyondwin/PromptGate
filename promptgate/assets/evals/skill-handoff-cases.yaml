@@ -28,3 +28,28 @@ cases:
       target_source: none
       target_skill: null
       status: no_match
+
+  - id: explicit_skill_beats_inferred_text
+    input: "$example-low-risk-skill 배포 말고 릴리스 노트 문장만 다듬어줘"
+    registered_skills:
+      - id: example-low-risk-skill
+        risk_level: low
+        auto_invocable: true
+      - id: release-skill
+        risk_level: high
+        auto_invocable: true
+    expected:
+      target_source: explicit
+      target_skill: example-low-risk-skill
+      status: auto_handoff
+
+  - id: registry_mismatch_no_hallucinated_skill
+    input: "보안 점검 스킬로 보내서 취약점 봐줘"
+    registered_skills:
+      - id: example-low-risk-skill
+        risk_level: low
+        auto_invocable: true
+    expected:
+      target_source: none
+      target_skill: null
+      status: no_match

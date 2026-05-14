@@ -90,6 +90,20 @@ class PromptGateResourceFallbackTest(unittest.TestCase):
         self.assertIn("Validated 5 eval file(s).", report)
         self.assertIn("Deterministic runtime guard checks passed.", report)
 
+    def test_packaged_eval_assets_match_source_fixtures(self):
+        source_dir = ROOT / "evals"
+        packaged_dir = ROOT / "promptgate/assets/evals"
+        source_files = sorted(path.name for path in source_dir.glob("*.yaml"))
+        packaged_files = sorted(path.name for path in packaged_dir.glob("*.yaml"))
+
+        self.assertEqual(source_files, packaged_files)
+        for filename in source_files:
+            self.assertEqual(
+                (source_dir / filename).read_text(encoding="utf-8"),
+                (packaged_dir / filename).read_text(encoding="utf-8"),
+                f"packaged eval asset differs from source fixture: {filename}",
+            )
+
 
 if __name__ == "__main__":
     unittest.main()

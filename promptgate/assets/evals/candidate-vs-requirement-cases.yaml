@@ -20,3 +20,26 @@ cases:
         - "Next.js"
       should_not_assume:
         - "Next.js is required"
+
+  - id: queue_candidate_not_requirement
+    input: "큐 쓰면 될 것 같은데 주문 처리 안 밀리게 하고 싶어"
+    expected:
+      goal_includes:
+        - "주문 처리"
+        - "밀리지 않게"
+      solution_candidates:
+        - "큐"
+      should_not_assume:
+        - "queue is required"
+
+  - id: postgres_candidate_not_requirement
+    input: "Postgres로 그냥 가도 되나 검색이랑 필터 많은 관리자 화면이 필요해"
+    expected:
+      goal_includes:
+        - "검색"
+        - "필터"
+        - "관리자 화면"
+      solution_candidates:
+        - "Postgres"
+      should_not_assume:
+        - "Postgres is required"
