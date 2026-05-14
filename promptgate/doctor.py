@@ -4,6 +4,9 @@ from dataclasses import dataclass
 import json
 import os
 from pathlib import Path
+import py_compile
+import subprocess
+import sys
 from typing import Any, Callable
 
 from .config import PromptGateConfig, load_config
@@ -13,6 +16,10 @@ from .result import build_fallback_result, load_result_schema, validate_result
 
 
 VALID_STATUSES = {"ok", "failed", "skipped"}
+HOOK_SCRIPTS = {
+    "codex": Path("adapters/codex/hooks/user-prompt-submit.example.py"),
+    "claude": Path("adapters/claude/hooks/user-prompt-submit.example.py"),
+}
 
 
 @dataclass(frozen=True)
@@ -66,6 +73,26 @@ def run_doctor(project_root: Path | None = None, provider: bool = False) -> Doct
         checks.append(_check_schema(root, mode=config.mode))
         checks.append(_run_check("lexicon", lambda: _check_lexicon(config)))
 
+    for platform, relative_path in HOOK_SCRIPTS.items():
+        script = root / relative_path
+        checks.append(_check_hook_compile(platform, script))
+    checks.append(
+        _check_hook_smoke(
+            "codex",
+            root / HOOK_SCRIPTS["codex"],
+            prompt="#raw 그대로",
+            expected_context="PromptGate bypass active",
+        )
+    )
+    checks.append(
+        _check_hook_smoke(
+            "claude",
+            root / HOOK_SCRIPTS["claude"],
+            prompt="코드말고 방향만",
+            expected_context="PromptGate runtime unavailable",
+        )
+    )
+
     checks.append(_check_provider_requested(provider))
     return DoctorReport(checks)
 
@@ -116,6 +143,68 @@ def _check_schema(root: Path, mode: str) -> DoctorCheck:
 def _check_lexicon(config: PromptGateConfig) -> tuple[str, dict[str, object]]:
     entries = load_configured_lexicon(config)
     return f"{len(entries)} entry(s)", {"entry_count": len(entries)}
+
+
+def _check_hook_compile(platform: str, script: Path) -> DoctorCheck:
+    name = f"{platform} hook compile"
+    if not script.is_file():
+        return DoctorCheck(name, "failed", f"missing {script}")
+    try:
+        py_compile.compile(str(script), doraise=True)
+    except py_compile.PyCompileError as exc:
+        return DoctorCheck(name, "failed", str(exc), {"path": str(script)})
+    return DoctorCheck(name, "ok", f"{script.relative_to(script.parents[3])} compiles")
+
+
+def _check_hook_smoke(platform: str, script: Path, prompt: str, expected_context: str) -> DoctorCheck:
+    name = f"{platform} hook smoke"
+    if not script.is_file():
+        return DoctorCheck(name, "failed", f"missing {script}")
+
+    env = dict(os.environ)
+    env.pop("OPENAI_API_KEY", None)
+    try:
+        completed = subprocess.run(
+            [sys.executable, str(script)],
+            input=json.dumps({"prompt": prompt}, ensure_ascii=False),
+            text=True,
+            capture_output=True,
+            cwd=script.parents[3],
+            env=env,
+            check=False,
+        )
+    except Exception as exc:
+        return DoctorCheck(name, "failed", str(exc), {"exception": exc.__class__.__name__})
+
+    if completed.returncode != 0:
+        return DoctorCheck(
+            name,
+            "failed",
+            f"hook exited {completed.returncode}",
+            {"stderr": completed.stderr[-500:]},
+        )
+    if completed.stderr:
+        return DoctorCheck(name, "failed", "hook wrote stderr", {"stderr": completed.stderr[-500:]})
+
+    try:
+        payload = json.loads(completed.stdout)
+        context = payload["hookSpecificOutput"]["additionalContext"]
+    except Exception as exc:
+        return DoctorCheck(
+            name,
+            "failed",
+            f"invalid hook JSON: {exc}",
+            {"stdout": completed.stdout[-500:]},
+        )
+
+    if expected_context not in context:
+        return DoctorCheck(
+            name,
+            "failed",
+            f"missing expected context {expected_context!r}",
+            {"context": context},
+        )
+    return DoctorCheck(name, "ok", f"valid JSON contains {expected_context}")
 
 
 def _check_provider_requested(provider: bool) -> DoctorCheck:

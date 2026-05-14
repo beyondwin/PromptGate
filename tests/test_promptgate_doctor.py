@@ -85,5 +85,24 @@ class PromptGateDoctorLocalChecksTest(unittest.TestCase):
         self.assertIn("pass --provider", by_name["provider"].summary)
 
 
+class PromptGateDoctorHookChecksTest(unittest.TestCase):
+    def test_run_doctor_verifies_hook_smoke_paths(self):
+        previous = os.environ.pop("OPENAI_API_KEY", None)
+        try:
+            report = run_doctor(project_root=ROOT, provider=False)
+        finally:
+            if previous is not None:
+                os.environ["OPENAI_API_KEY"] = previous
+
+        by_name = {check.name: check for check in report.checks}
+
+        self.assertEqual(by_name["codex hook compile"].status, "ok")
+        self.assertEqual(by_name["claude hook compile"].status, "ok")
+        self.assertEqual(by_name["codex hook smoke"].status, "ok")
+        self.assertEqual(by_name["claude hook smoke"].status, "ok")
+        self.assertIn("PromptGate bypass active", by_name["codex hook smoke"].summary)
+        self.assertIn("PromptGate runtime unavailable", by_name["claude hook smoke"].summary)
+
+
 if __name__ == "__main__":
     unittest.main()
