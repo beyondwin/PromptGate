@@ -1,0 +1,22 @@
+cases:
+  - id: destructive_skill_block
+    input: "$example-destructive-skill 전부 삭제해줘"
+    registered_skills:
+      - id: example-destructive-skill
+        risk_level: destructive
+        auto_invocable: false
+    expected:
+      target_skill: example-destructive-skill
+      status: blocked_by_risk
+      requires_confirmation: true
+
+  - id: high_risk_skill_suggest
+    input: "$release-skill 배포해줘"
+    registered_skills:
+      - id: release-skill
+        risk_level: high
+        auto_invocable: true
+    expected:
+      target_skill: release-skill
+      status: blocked_by_risk
+      requires_confirmation: true

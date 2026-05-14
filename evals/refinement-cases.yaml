@@ -1,0 +1,22 @@
+cases:
+  - id: no_code_direction
+    input: "이거 별론데 코드말고 방향만"
+    expected:
+      refined_prompt_includes:
+        - "코드는 작성하지 말고"
+        - "개선 방향"
+      exclusions:
+        - "code"
+      output_preferences:
+        - "direction"
+      clarification_needed: false
+
+  - id: natural_rewrite
+    input: "이 문장 정리좀 너무 AI같지 않게"
+    expected:
+      refined_prompt_includes:
+        - "자연스럽게"
+        - "과장"
+      output_preferences:
+        - "natural"
+      clarification_needed: false
