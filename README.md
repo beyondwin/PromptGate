@@ -38,6 +38,27 @@ Install development dependencies:
 python3 -m pip install -r requirements-dev.txt
 ```
 
+Run PromptGate over a raw prompt:
+
+```bash
+python3 -m promptgate --json "Redis 쓰면 되나 세션이랑 캐시랑 같이 쓰고 싶은데"
+```
+
+The executable runtime is LLM-first. The provider creates a draft `PromptGateResult`, and Python validates schema, registry, risk, and mode policy before returning the final result.
+
+By default, tests and CI should use fake providers. Real OpenAI calls require:
+
+```bash
+export OPENAI_API_KEY=sk-your-openai-api-key
+export PROMPTGATE_OPENAI_MODEL=gpt-5
+```
+
+Run all runtime evals:
+
+```bash
+python3 -m promptgate eval
+```
+
 Validate eval fixtures:
 
 ```bash
