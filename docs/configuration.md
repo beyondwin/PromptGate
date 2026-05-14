@@ -31,3 +31,16 @@ PROMPTGATE_OPENAI_MODEL=gpt-5
 ```
 
 Default tests do not call a real provider. They use fake provider responses and Python guard checks.
+
+## Lexicon
+
+PromptGate can load a user lexicon from config:
+
+```yaml
+promptgate:
+  lexicon:
+    use_default_korean_lexicon: true
+    project_lexicon_path: ./core/lexicon/default-user-lexicon.yaml
+```
+
+Matched lexicon entries are sent to the provider as interpretation hints. Python guards still own final schema, skill registry, risk, and handoff policy.

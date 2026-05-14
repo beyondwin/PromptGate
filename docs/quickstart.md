@@ -32,3 +32,21 @@ export PROMPTGATE_OPENAI_MODEL=gpt-5
 ```
 
 PromptGate uses the LLM output as a draft. Python guards enforce the final schema, skill registry, risk policy, and mode policy.
+
+## Hook Smoke Test
+
+The example Claude and Codex hooks read a `UserPromptSubmit` JSON payload from stdin and emit hook JSON on stdout.
+
+Codex example:
+
+```bash
+printf '{"prompt":"코드말고 Redis 쓰면 되나"}' | python3 adapters/codex/hooks/user-prompt-submit.example.py
+```
+
+Claude example:
+
+```bash
+printf '{"prompt":"코드말고 Redis 쓰면 되나"}' | python3 adapters/claude/hooks/user-prompt-submit.example.py
+```
+
+If `OPENAI_API_KEY` is not configured, the hooks still emit valid JSON and preserve the original prompt as raw input.
