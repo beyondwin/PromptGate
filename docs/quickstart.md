@@ -73,4 +73,17 @@ To include a real provider smoke check, set `OPENAI_API_KEY` and run:
 python3 -m promptgate doctor --provider
 ```
 
-Doctor does not install hooks or mutate user configuration.
+Doctor checks readiness. To preview hook installation for a host adapter, run:
+
+```bash
+python3 -m promptgate hooks install --adapter codex
+python3 -m promptgate hooks install --adapter claude
+```
+
+The installer is dry-run by default. To write the PromptGate-owned hook block, pass `--apply`:
+
+```bash
+python3 -m promptgate hooks install --adapter codex --apply
+```
+
+Use `--target /path/to/settings.json` for non-standard host-agent config paths. Existing target files are backed up before modification.
