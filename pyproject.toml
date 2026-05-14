@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "promptgate"
+version = "0.1.0"
+description = "Prompt refinement toolkit for AI agent workflows."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "LicenseRef-Proprietary" }
+authors = [
+  { name = "PromptGate maintainers" }
+]
+dependencies = [
+  "PyYAML>=6.0.1,<7",
+  "jsonschema>=4.23.0,<5",
+  "openai>=1.0,<3"
+]
+
+[project.scripts]
+promptgate = "promptgate.cli:main"
+
+[tool.setuptools]
+packages = ["promptgate"]
+include-package-data = true
+
+[tool.setuptools.package-data]
+promptgate = [
+  "assets/promptgate.config.example.yaml",
+  "assets/core/output-contract/*.json",
+  "assets/core/skill-registry/*.yaml",
+  "assets/core/lexicon/*.yaml",
+  "assets/evals/*.yaml",
+  "assets/adapters/codex/hooks/*.py",
+  "assets/adapters/claude/hooks/*.py"
+]
