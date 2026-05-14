@@ -63,3 +63,26 @@ python3 -m promptgate doctor --provider
 ```
 
 When `--provider` is set but `OPENAI_API_KEY` is missing, the provider check is reported as skipped. Missing credentials do not make the local readiness check fail.
+
+## Hook Installer
+
+Preview install changes without writing files:
+
+```bash
+python3 -m promptgate hooks install --adapter codex
+python3 -m promptgate hooks install --adapter claude
+```
+
+Apply changes explicitly:
+
+```bash
+python3 -m promptgate hooks install --adapter codex --apply
+```
+
+Target discovery:
+
+- Codex uses `$CODEX_HOME/config.json`, then `~/.codex/config.json`.
+- Claude uses `$CLAUDE_CONFIG_DIR/settings.json`, then `~/.claude/settings.json`.
+- `--target PATH` overrides discovery.
+
+The installer writes only `promptgate.hooks.UserPromptSubmit` and preserves unrelated JSON keys. Existing files are backed up as `<target>.promptgate-backup-YYYYMMDDHHMMSS` before modification.

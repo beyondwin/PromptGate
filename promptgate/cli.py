@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+from pathlib import Path
 import sys
 from typing import Any
 
@@ -18,6 +19,8 @@ def main(argv: list[str] | None = None) -> int:
     active_argv = list(sys.argv[1:] if argv is None else argv)
     if active_argv and active_argv[0] == "doctor":
         return _doctor_main(active_argv[1:])
+    if active_argv and active_argv[0] == "hooks":
+        return _hooks_main(active_argv[1:])
 
     parser = argparse.ArgumentParser(description="Run PromptGate over a raw prompt.")
     parser.add_argument("prompt", nargs="*", help="Raw prompt to refine, or 'eval' to run evals.")
@@ -52,6 +55,38 @@ def _doctor_main(argv: list[str]) -> int:
     report = run_doctor(provider=args.provider)
     print(format_doctor_report(report, as_json=args.json))
     return 0 if report.ok else 1
+
+
+def _hooks_main(argv: list[str]) -> int:
+    parser = argparse.ArgumentParser(description="Manage PromptGate hooks.")
+    subparsers = parser.add_subparsers(dest="command", required=True)
+
+    install_parser = subparsers.add_parser(
+        "install",
+        help="Install PromptGate hook configuration.",
+    )
+    install_parser.add_argument("--adapter", choices=("codex", "claude"), required=True)
+    install_parser.add_argument("--target", type=Path)
+    install_parser.add_argument("--apply", action="store_true")
+    install_parser.add_argument("--json", action="store_true")
+    install_parser.add_argument("--skip-doctor", action="store_true")
+
+    args = parser.parse_args(argv)
+
+    if args.command == "install":
+        from .hooks import format_hook_install_report, install_hook
+
+        report = install_hook(
+            args.adapter,
+            target=args.target,
+            apply=args.apply,
+            skip_doctor=args.skip_doctor,
+        )
+        print(format_hook_install_report(report, as_json=args.json))
+        return 0 if report.ok else 1
+
+    parser.error(f"unsupported hooks command: {args.command}")
+    return 2
 
 
 if __name__ == "__main__":

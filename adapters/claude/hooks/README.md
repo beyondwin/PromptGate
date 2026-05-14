@@ -16,4 +16,16 @@ To verify the real provider path as well, set `OPENAI_API_KEY` and run:
 python3 -m promptgate doctor --provider
 ```
 
-Doctor validates hook readiness but does not install hooks or mutate Claude configuration. Review and test hook scripts before enabling them.
+Doctor validates hook readiness. To preview Claude hook installation, run:
+
+```bash
+python3 -m promptgate hooks install --adapter claude
+```
+
+To apply the PromptGate-owned hook block, run:
+
+```bash
+python3 -m promptgate hooks install --adapter claude --apply
+```
+
+Review the resulting Claude configuration for your local Claude Code version before relying on automatic hook consumption.
