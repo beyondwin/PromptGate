@@ -1,4 +1,7 @@
+import contextlib
+import io
 import json
+import os
 import unittest
 
 from promptgate.cli import format_result
@@ -22,6 +25,45 @@ class PromptGateCLITest(unittest.TestCase):
         output = format_result(VALID_RESULT, as_json=False, debug=False)
 
         self.assertEqual(output, "문장을 자연스럽게 정리해줘.")
+
+
+class PromptGateCLIDoctorTest(unittest.TestCase):
+    def test_doctor_json_cli_outputs_structured_report(self):
+        from promptgate.cli import main
+
+        previous = os.environ.pop("OPENAI_API_KEY", None)
+        stdout = io.StringIO()
+        try:
+            with contextlib.redirect_stdout(stdout):
+                exit_code = main(["doctor", "--json"])
+        finally:
+            if previous is not None:
+                os.environ["OPENAI_API_KEY"] = previous
+
+        payload = json.loads(stdout.getvalue())
+
+        self.assertEqual(exit_code, 0)
+        self.assertTrue(payload["ok"])
+        self.assertIn("config", [check["name"] for check in payload["checks"]])
+
+    def test_doctor_provider_json_skips_provider_without_key(self):
+        from promptgate.cli import main
+
+        previous = os.environ.pop("OPENAI_API_KEY", None)
+        stdout = io.StringIO()
+        try:
+            with contextlib.redirect_stdout(stdout):
+                exit_code = main(["doctor", "--provider", "--json"])
+        finally:
+            if previous is not None:
+                os.environ["OPENAI_API_KEY"] = previous
+
+        payload = json.loads(stdout.getvalue())
+        by_name = {check["name"]: check for check in payload["checks"]}
+
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(by_name["provider"]["status"], "skipped")
+        self.assertEqual(by_name["provider"]["summary"], "OPENAI_API_KEY is not set")
 
 
 if __name__ == "__main__":
