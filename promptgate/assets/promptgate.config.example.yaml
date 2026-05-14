@@ -1,0 +1,26 @@
+promptgate:
+  mode: auto
+  auto_handoff_threshold: 0.78
+  max_recommendations: 3
+
+  skill_registry:
+    sources:
+      - project
+      - user
+      - plugin
+    registry_path: ./core/skill-registry/examples.yaml
+
+  risk_policy:
+    low: auto
+    medium: auto
+    high: suggest
+    destructive: require_confirmation
+
+  output:
+    show_refined_prompt: false
+    show_handoff_notice: false
+    debug_on_keyword: true
+
+  lexicon:
+    use_default_korean_lexicon: true
+    project_lexicon_path: ./core/lexicon/default-user-lexicon.yaml

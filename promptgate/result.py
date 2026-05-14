@@ -5,6 +5,8 @@ import json
 from pathlib import Path
 from typing import Any
 
+from .resources import runtime_root
+
 try:
     from jsonschema import Draft202012Validator
 except ImportError:  # pragma: no cover - exercised in dependency-light environments.
@@ -16,7 +18,7 @@ class ResultValidationError(ValueError):
 
 
 def load_result_schema(project_root: Path | None = None) -> dict[str, Any]:
-    root = project_root or Path.cwd()
+    root = runtime_root(project_root)
     schema_path = root / "core/output-contract/promptgate-result.schema.json"
     with schema_path.open("r", encoding="utf-8") as handle:
         return json.load(handle)

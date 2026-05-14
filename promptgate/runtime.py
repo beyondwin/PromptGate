@@ -10,6 +10,7 @@ from .llm import OpenAIResponsesProvider, PromptGateProvider
 from .preflight import analyze_preflight
 from .prompts import build_promptgate_request
 from .registry import SkillRegistry, load_registry
+from .resources import runtime_root
 from .result import (
     ResultValidationError,
     build_fallback_result,
@@ -26,7 +27,7 @@ def run_promptgate(
     config: PromptGateConfig | None = None,
     registry: SkillRegistry | None = None,
 ) -> dict[str, Any]:
-    root = project_root or Path.cwd()
+    root = runtime_root(project_root)
     active_config = config or load_config(root)
     active_registry = registry or load_registry(active_config.registry_path)
     schema = load_result_schema(root)

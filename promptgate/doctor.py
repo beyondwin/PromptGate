@@ -12,6 +12,7 @@ from typing import Any, Callable
 from .config import PromptGateConfig, load_config
 from .lexicon import load_configured_lexicon
 from .registry import load_registry
+from .resources import runtime_root, source_root
 from .result import build_fallback_result, load_result_schema, validate_result
 from .runtime import run_promptgate
 
@@ -59,7 +60,7 @@ class DoctorReport:
 
 
 def run_doctor(project_root: Path | None = None, provider: bool = False) -> DoctorReport:
-    root = (project_root or Path.cwd()).resolve()
+    root = runtime_root(project_root)
     checks: list[DoctorCheck] = []
 
     config, config_check = _run_check_with_value("config", lambda: _check_config(root))
@@ -164,6 +165,7 @@ def _check_hook_smoke(platform: str, script: Path, prompt: str, expected_context
 
     env = dict(os.environ)
     env.pop("OPENAI_API_KEY", None)
+    env["PYTHONPATH"] = _prepend_pythonpath(source_root(), env.get("PYTHONPATH"))
     try:
         completed = subprocess.run(
             [sys.executable, str(script)],
@@ -206,6 +208,12 @@ def _check_hook_smoke(platform: str, script: Path, prompt: str, expected_context
             {"context": context},
         )
     return DoctorCheck(name, "ok", f"valid JSON contains {expected_context}")
+
+
+def _prepend_pythonpath(path: Path, current: str | None) -> str:
+    if not current:
+        return str(path)
+    return f"{path}{os.pathsep}{current}"
 
 
 def _check_provider(root: Path, provider: bool) -> DoctorCheck:

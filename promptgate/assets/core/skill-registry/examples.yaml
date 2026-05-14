@@ -1,0 +1,38 @@
+skills:
+  - id: example-low-risk-skill
+    platform_names:
+      claude: example-low-risk-skill
+      codex: example-low-risk-skill
+    description: Example low-risk registered skill for refining a written artifact.
+    aliases:
+      - polish
+      - rewrite
+      - 정리
+    domains:
+      - writing
+    task_types:
+      - rewrite
+      - refine
+    trigger_phrases:
+      - 정리해줘
+      - 자연스럽게
+    risk_level: low
+    auto_invocable: true
+
+  - id: example-destructive-skill
+    platform_names:
+      claude: example-destructive-skill
+      codex: example-destructive-skill
+    description: Example destructive skill used only to validate risk blocking.
+    aliases:
+      - delete
+      - remove permanently
+    domains:
+      - operations
+    task_types:
+      - destructive-action
+    trigger_phrases:
+      - delete everything
+      - permanently remove
+    risk_level: destructive
+    auto_invocable: false

@@ -6,6 +6,8 @@ from typing import Any
 
 import yaml
 
+from .resources import runtime_root
+
 
 VALID_MODES = {"auto", "suggest", "debug", "off"}
 DEFAULT_RISK_POLICY = {
@@ -77,10 +79,21 @@ class PromptGateConfig:
 
 
 def load_config(project_root: Path | None = None) -> PromptGateConfig:
-    root = project_root or Path.cwd()
-    local_config = root / "promptgate.config.yaml"
+    requested_root = project_root or Path.cwd()
+    root = runtime_root(requested_root)
+    local_config = requested_root / "promptgate.config.yaml"
+    root_local_config = root / "promptgate.config.yaml"
     example_config = root / "promptgate.config.example.yaml"
-    path = local_config if local_config.exists() else example_config
+
+    if local_config.exists():
+        path = local_config
+        config_root = requested_root
+    elif root_local_config.exists():
+        path = root_local_config
+        config_root = root
+    else:
+        path = example_config
+        config_root = root
 
     if not path.exists():
         raise ConfigError(f"PromptGate config not found at {local_config} or {example_config}")
@@ -91,4 +104,4 @@ def load_config(project_root: Path | None = None) -> PromptGateConfig:
     if not isinstance(payload, dict) or not isinstance(payload.get("promptgate"), dict):
         raise ConfigError(f"{path}: expected top-level promptgate mapping")
 
-    return PromptGateConfig.from_mapping(payload["promptgate"], project_root=root)
+    return PromptGateConfig.from_mapping(payload["promptgate"], project_root=config_root)

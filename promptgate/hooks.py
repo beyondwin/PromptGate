@@ -8,6 +8,8 @@ import os
 from pathlib import Path
 import shutil
 
+from .resources import runtime_root
+
 
 HOOK_RELATIVE_PATHS = {
     "codex": Path("adapters/codex/hooks/user-prompt-submit.example.py"),
@@ -61,7 +63,7 @@ def install_hook(
     now: Callable[[], datetime] | None = None,
 ) -> HookInstallReport:
     active_env = dict(os.environ if env is None else env)
-    root = (project_root or Path.cwd()).resolve()
+    root = runtime_root() if project_root is None else project_root.resolve()
     mode = "apply" if apply else "dry-run"
 
     target_path = _resolve_target(adapter, target, active_env)
