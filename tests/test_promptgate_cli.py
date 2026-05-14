@@ -28,6 +28,100 @@ class PromptGateCLITest(unittest.TestCase):
 
         self.assertEqual(output, "문장을 자연스럽게 정리해줘.")
 
+    def test_eval_cli_remains_deterministic(self):
+        from promptgate.cli import main
+
+        stdout = io.StringIO()
+
+        with contextlib.redirect_stdout(stdout):
+            exit_code = main(["eval"])
+
+        self.assertEqual(exit_code, 0)
+        self.assertIn("Deterministic runtime guard checks passed.", stdout.getvalue())
+
+    def test_provider_eval_missing_key_returns_usage_error(self):
+        from promptgate.cli import main
+
+        previous = os.environ.pop("OPENAI_API_KEY", None)
+        stdout = io.StringIO()
+        stderr = io.StringIO()
+        try:
+            with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+                exit_code = main(["eval", "--provider", "--yes", "--limit", "1"])
+        finally:
+            if previous is not None:
+                os.environ["OPENAI_API_KEY"] = previous
+
+        self.assertEqual(exit_code, 2)
+        self.assertIn("OPENAI_API_KEY", stderr.getvalue())
+
+    def test_provider_eval_non_tty_without_yes_returns_usage_error(self):
+        from promptgate.cli import main
+
+        previous = os.environ.get("OPENAI_API_KEY")
+        os.environ["OPENAI_API_KEY"] = "fake-key"
+        stdout = io.StringIO()
+        stderr = io.StringIO()
+        try:
+            with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+                exit_code = main(["eval", "--provider", "--limit", "1"])
+        finally:
+            if previous is None:
+                os.environ.pop("OPENAI_API_KEY", None)
+            else:
+                os.environ["OPENAI_API_KEY"] = previous
+
+        self.assertEqual(exit_code, 2)
+        self.assertIn("--yes", stderr.getvalue())
+
+
+class PromptGateCLIProviderEvalTest(unittest.TestCase):
+    def test_provider_eval_cli_can_use_injected_provider_for_tests(self):
+        from promptgate.cli import main
+        from promptgate.llm import FakeProvider
+
+        provider_result = dict(VALID_RESULT)
+        stdout = io.StringIO()
+
+        with contextlib.redirect_stdout(stdout):
+            exit_code = main(
+                ["eval", "--provider", "--yes", "--case-id", "no_question_when_direction_clear"],
+                provider_factory=lambda: FakeProvider([json.dumps(provider_result, ensure_ascii=False)]),
+            )
+
+        self.assertEqual(exit_code, 1)
+        self.assertIn("Provider eval: 1 cases", stdout.getvalue())
+        self.assertIn("Failures:", stdout.getvalue())
+
+    def test_provider_eval_cli_writes_report_json(self):
+        from promptgate.cli import main
+        from promptgate.llm import FakeProvider
+
+        provider_result = dict(VALID_RESULT)
+        with tempfile.TemporaryDirectory() as tempdir:
+            report_path = Path(tempdir) / "report.json"
+            stdout = io.StringIO()
+
+            with contextlib.redirect_stdout(stdout):
+                exit_code = main(
+                    [
+                        "eval",
+                        "--provider",
+                        "--yes",
+                        "--case-id",
+                        "natural_rewrite",
+                        "--report-json",
+                        str(report_path),
+                    ],
+                    provider_factory=lambda: FakeProvider([json.dumps(provider_result, ensure_ascii=False)]),
+                )
+
+            payload = json.loads(report_path.read_text(encoding="utf-8"))
+
+        self.assertEqual(exit_code, 1)
+        self.assertEqual(payload["metadata"]["case_count"], 1)
+        self.assertEqual(payload["cases"][0]["case_id"], "natural_rewrite")
+
 
 class PromptGateCLIDoctorTest(unittest.TestCase):
     def test_doctor_json_cli_outputs_structured_report(self):
