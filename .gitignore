@@ -21,6 +21,11 @@ node_modules/
 dist/
 build/
 coverage/
+htmlcov/
+*.egg-info/
+*.egg
+*.whl
+.eggs/
 .next/
 .turbo/
 
@@ -28,14 +33,26 @@ coverage/
 __pycache__/
 *.py[cod]
 .pytest_cache/
+.coverage
+.coverage.*
+.hypothesis/
 .mypy_cache/
+.pyre/
+.pyright/
 .ruff_cache/
+.tox/
+.nox/
 .venv/
 venv/
+env/
+ENV/
 
 # Local tool caches
 .cache/
 .tmp/
 tmp/
 .codex-orchestrator/
-.worktrees
+.worktrees/
+
+# Local PromptGate configuration
+promptgate.config.yaml
