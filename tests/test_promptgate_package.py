@@ -41,6 +41,18 @@ class PromptGatePackageTest(unittest.TestCase):
         self.assertEqual(completed.returncode, 0, completed.stderr)
         self.assertIn("Run PromptGate over a raw prompt.", completed.stdout)
 
+    def test_pyproject_package_data_includes_runtime_assets(self):
+        pyproject = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
+        package_data = pyproject["tool"]["setuptools"]["package-data"]["promptgate"]
+
+        self.assertIn("assets/promptgate.config.example.yaml", package_data)
+        self.assertIn("assets/core/output-contract/*.json", package_data)
+        self.assertIn("assets/core/skill-registry/*.yaml", package_data)
+        self.assertIn("assets/core/lexicon/*.yaml", package_data)
+        self.assertIn("assets/evals/*.yaml", package_data)
+        self.assertIn("assets/adapters/codex/hooks/*.py", package_data)
+        self.assertIn("assets/adapters/claude/hooks/*.py", package_data)
+
 
 if __name__ == "__main__":
     unittest.main()
