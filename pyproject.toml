@@ -8,7 +8,7 @@ version = "0.1.0"
 description = "Prompt refinement toolkit for AI agent workflows."
 readme = "README.md"
 requires-python = ">=3.11"
-license = { text = "LicenseRef-Proprietary" }
+license = "LicenseRef-Proprietary"
 authors = [
   { name = "PromptGate maintainers" }
 ]
@@ -22,8 +22,11 @@ dependencies = [
 promptgate = "promptgate.cli:main"
 
 [tool.setuptools]
-packages = ["promptgate"]
 include-package-data = true
+
+[tool.setuptools.packages.find]
+include = ["promptgate*"]
+namespaces = true
 
 [tool.setuptools.package-data]
 promptgate = [
