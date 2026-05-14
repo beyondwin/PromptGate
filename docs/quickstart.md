@@ -87,3 +87,14 @@ python3 -m promptgate hooks install --adapter codex --apply
 ```
 
 Use `--target /path/to/settings.json` for non-standard host-agent config paths. Existing target files are backed up before modification.
+
+## Installed Package Smoke
+
+Before distributing a wheel, run:
+
+```bash
+python3 -m pip install -r requirements-dev.txt
+python3 scripts/verify-wheel-install.py
+```
+
+The smoke script builds a wheel, installs it into a fresh virtual environment, and verifies `promptgate doctor --json`, `promptgate eval`, and hook install dry-run/apply behavior outside the source checkout.

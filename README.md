@@ -32,31 +32,47 @@ PromptGate = Prompt Refinement Engine + External Skill Handoff Layer
 
 ## Quickstart
 
-Install development dependencies:
+Build and install the private wheel:
 
 ```bash
 python3 -m pip install -r requirements-dev.txt
+python3 -m build --wheel
+python3 -m pip install dist/promptgate-0.1.0-py3-none-any.whl
+```
+
+Verify the installed CLI:
+
+```bash
+promptgate doctor
+promptgate eval
+```
+
+Preview hook installation:
+
+```bash
+promptgate hooks install --adapter codex
+promptgate hooks install --adapter claude
 ```
 
 Run PromptGate over a raw prompt:
 
 ```bash
-python3 -m promptgate --json "Redis 쓰면 되나 세션이랑 캐시랑 같이 쓰고 싶은데"
+promptgate --json "Redis 쓰면 되나 세션이랑 캐시랑 같이 쓰고 싶은데"
 ```
 
-The executable runtime is LLM-first. The provider creates a draft `PromptGateResult`, and Python validates schema, registry, risk, and mode policy before returning the final result.
-
-By default, tests and CI should use fake providers. Real OpenAI calls require:
+Real provider calls require:
 
 ```bash
 export OPENAI_API_KEY=sk-your-openai-api-key
 export PROMPTGATE_OPENAI_MODEL=gpt-5
 ```
 
-Run all runtime evals:
+The executable runtime is LLM-first. The provider creates a draft `PromptGateResult`, and Python validates schema, registry, risk, and mode policy before returning the final result.
+
+Before distributing a private wheel, run:
 
 ```bash
-python3 -m promptgate eval
+python3 scripts/verify-wheel-install.py
 ```
 
 Validate eval fixtures:
@@ -83,4 +99,4 @@ docs/       Public documentation and ADRs
 
 ## License
 
-License choice is intentionally deferred until the repository is ready for public release. Do not publish this repository as open source until `LICENSE` is added.
+This repository and package are private. Public package publishing remains blocked until maintainers approve a public license and publishing target.

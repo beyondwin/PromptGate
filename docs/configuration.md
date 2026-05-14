@@ -86,3 +86,14 @@ Target discovery:
 - `--target PATH` overrides discovery.
 
 The installer writes only `promptgate.hooks.UserPromptSubmit` and preserves unrelated JSON keys. Existing files are backed up as `<target>.promptgate-backup-YYYYMMDDHHMMSS` before modification.
+
+## Installed Package Defaults
+
+When PromptGate runs inside a source checkout, config and core assets are read from that checkout. When PromptGate runs from an installed wheel outside a checkout, it uses bundled package assets:
+
+- `promptgate/assets/promptgate.config.example.yaml`
+- `promptgate/assets/core/output-contract/promptgate-result.schema.json`
+- `promptgate/assets/core/skill-registry/examples.yaml`
+- `promptgate/assets/core/lexicon/default-user-lexicon.yaml`
+
+A local `promptgate.config.yaml` in the current working directory overrides bundled defaults. Relative paths inside that local config are resolved against the directory containing the local config.
