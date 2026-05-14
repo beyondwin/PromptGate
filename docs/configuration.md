@@ -44,3 +44,22 @@ promptgate:
 ```
 
 Matched lexicon entries are sent to the provider as interpretation hints. Python guards still own final schema, skill registry, risk, and handoff policy.
+
+## Doctor Checks
+
+`python3 -m promptgate doctor` verifies local PromptGate readiness without credentials or network access. It checks:
+
+- configuration loading
+- skill registry loading
+- result schema validation
+- configured lexicon loading
+- Claude and Codex hook script compilation
+- hook JSON smoke behavior for bypass and provider-unavailable paths
+
+Provider checks are opt-in:
+
+```bash
+python3 -m promptgate doctor --provider
+```
+
+When `--provider` is set but `OPENAI_API_KEY` is missing, the provider check is reported as skipped. Missing credentials do not make the local readiness check fail.
